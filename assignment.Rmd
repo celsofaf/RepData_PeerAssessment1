@@ -1,0 +1,81 @@
+# Reproducible Research: Peer Assessment 1
+
+
+## Loading and preprocessing the data
+I read the data from the compressed .zip file. I took a broad look on it and din't
+think I needed to make changes (processing) on the data, at least initialy.
+```{r echo=TRUE}
+data <- read.csv(unz("activity.zip", "activity.csv"))
+str(data)
+head(data)
+tail(data)
+summary(data$steps)
+```
+
+## What is mean total number of steps taken per day?
+I will make a histogram of the steps and calculate mean and median, ignoring the
+missing (NA) values. A histogram already ignores NA values. :-)
+```{r echo=TRUE}
+daytotal <- unlist(lapply(split(data$steps, data$date), sum))
+hist(daytotal, xlab="Total steps per day")
+mean(daytotal, na.rm=TRUE)
+median(daytotal, na.rm=TRUE)
+```
+
+
+## What is the average daily activity pattern?
+Let's split the data and make a plot of the 5-min intervals averaged across all
+days.
+```{r echo=TRUE}
+intervalmeans <- lapply(split(data$steps, data$interval), mean, na.rm=TRUE)
+intervalmeans <- unlist(intervalmeans)
+plot(as.numeric(names(intervalmeans)), intervalmeans, type="l", xlab="5-min interval", ylab="Mean daily steps")
+```
+Now, let's see which 5-min interval, on average across all the days in the dataset, contains the maximum number of steps.
+```{r echo=TRUE}
+max.interval <- which(intervalmeans == max(intervalmeans))
+names(max.interval)
+```
+
+## Imputing missing values
+First, let's calculate the number of missing values for the steps in our data.
+```{r echo=TRUE}
+length(data$steps[is.na(data$steps)])
+```
+Now, I was asked to devise a strategy for the missing values in the dataset. I chose to substitute the missing values by the mean of the corresponding 5-min interval, calculated over all days. A new dataset will be created, so I don't need to overwrite the original one.
+```{r echo=TRUE}
+newdata <- data
+for ( i in 1:nrow(newdata) ) {
+    if ( is.na(newdata$steps[i]) ) {
+        int <- as.character(newdata$interval[i])
+        newdata$steps[i] <- intervalmeans[int]
+    }
+}
+```
+I'm going to make a histogram of the total number of steps taken each day, using the new dataset, and calculate and report the mean and median total number of steps taken per day.
+```{r echo=TRUE}
+daytotal <- unlist(lapply(split(newdata$steps, newdata$date), sum))
+hist(daytotal, xlab="Total steps per day")
+print(paste("Mean total number of steps per day:", as.character(mean(daytotal))))
+print(paste("Median total number of steps per day:", median(daytotal)))
+```
+The mean is the same as in the first part of the analysis (ignoring the NAs), as expected, since I simply forced the NAs to be the mean of each day... The median is now equal to the mean; before, it was only slightly different. The very large number of NAs, all of which were replaced by an avarage as I chose to do, is the cause of this data phenomenom.
+
+
+## Are there differences in activity patterns between weekdays and weekends?
+Firt, I will create a new factor variable in the dataset with two levels – “weekday” and “weekend” - indicating whether a given date is a weekday or weekend day. Then, I will make two plots, of the 5-min interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
+```{r echo=TRUE}
+wkday <- c()
+candidates <- c("segunda", "terça", "quarta", "quinta", "sexta")  # my system is in Portuguese
+for ( i in 1:nrow(newdata) )
+    wkday <- c(wkday, weekdays(as.Date(newdata$date[i])) %in% candidates)
+newdata$wkday <- wkday
+par(mfrow=c(2, 1))
+newdata.wkday <- newdata[newdata$wkday == TRUE, ]
+newdata.wkend <- newdata[newdata$wkday == FALSE, ]
+wkdaymean <- unlist(lapply(split(newdata.wkday$steps, newdata.wkday$interval), mean))
+wkendmean <- unlist(lapply(split(newdata.wkend$steps, newdata.wkend$interval), mean))
+plot(as.numeric(names(wkdaymean)), wkdaymean, type="l", xlab="5-min interval, weekdays", ylab="Mean daily steps")
+plot(as.numeric(names(wkendmean)), wkendmean, type="l", xlab="5-min interval, weekend", ylab="Mean daily steps")
+```
+We can notice that, on weekends, the steps are more evenly distributed throughout the day as oposed to on weekdays. This is expected, because of the working hours, and the weekday peak at around 9:00 (and the smaller one around 18:00) can be attributed to commuting. And, clearly, on average, people wake up later on weekends...
