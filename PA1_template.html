@@ -288,9 +288,6 @@ names(max.interval)
 steps.na &lt;- which(is.na(newdata$steps))
 int &lt;- as.character(newdata$interval[steps.na])
 newdata$steps[steps.na] &lt;- intervalmeans[int]
-# for ( i in 1:nrow(newdata) ) { if ( is.na(newdata$steps[i]) ) { int &lt;-
-# as.character(newdata$interval[i]) newdata$steps[i] &lt;- intervalmeans[int] }
-# }
 </code></pre>
 
 <p>I&#39;m going to make a histogram of the total number of steps taken each day, using the new dataset, and calculate and report the mean and median total number of steps taken per day.</p>
