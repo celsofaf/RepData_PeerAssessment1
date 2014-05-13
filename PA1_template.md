@@ -124,12 +124,12 @@ Now, I was asked to devise a strategy for the missing values in the dataset. I c
 
 ```r
 newdata <- data
-for (i in 1:nrow(newdata)) {
-    if (is.na(newdata$steps[i])) {
-        int <- as.character(newdata$interval[i])
-        newdata$steps[i] <- intervalmeans[int]
-    }
-}
+steps.na <- which(is.na(newdata$steps))
+int <- as.character(newdata$interval[steps.na])
+newdata$steps[steps.na] <- intervalmeans[int]
+# for ( i in 1:nrow(newdata) ) { if ( is.na(newdata$steps[i]) ) { int <-
+# as.character(newdata$interval[i]) newdata$steps[i] <- intervalmeans[int] }
+# }
 ```
 
 I'm going to make a histogram of the total number of steps taken each day, using the new dataset, and calculate and report the mean and median total number of steps taken per day.

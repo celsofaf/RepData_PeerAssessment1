@@ -9,3 +9,7 @@ mean(data$steps, na.rm=TRUE)
 median(data$steps, na.rm=TRUE)
 intervalmeans <- unlist(lapply(split(data$steps, data$interval), mean, na.rm=TRUE))
 plot(intervalmeans, type="l")
+newdata <- data
+steps.na <- which(is.na(newdata$steps))
+int <- as.character(newdata$interval[steps.na])
+newdata$steps[steps.na] <- intervalmeans[int]

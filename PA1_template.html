@@ -285,12 +285,12 @@ names(max.interval)
 <p>Now, I was asked to devise a strategy for the missing values in the dataset. I chose to substitute the missing values by the mean of the corresponding 5-min interval, calculated over all days. A new dataset will be created, so I don&#39;t need to overwrite the original one.</p>
 
 <pre><code class="r">newdata &lt;- data
-for (i in 1:nrow(newdata)) {
-    if (is.na(newdata$steps[i])) {
-        int &lt;- as.character(newdata$interval[i])
-        newdata$steps[i] &lt;- intervalmeans[int]
-    }
-}
+steps.na &lt;- which(is.na(newdata$steps))
+int &lt;- as.character(newdata$interval[steps.na])
+newdata$steps[steps.na] &lt;- intervalmeans[int]
+# for ( i in 1:nrow(newdata) ) { if ( is.na(newdata$steps[i]) ) { int &lt;-
+# as.character(newdata$interval[i]) newdata$steps[i] &lt;- intervalmeans[int] }
+# }
 </code></pre>
 
 <p>I&#39;m going to make a histogram of the total number of steps taken each day, using the new dataset, and calculate and report the mean and median total number of steps taken per day.</p>
